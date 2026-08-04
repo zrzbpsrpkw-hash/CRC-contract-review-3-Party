@@ -4,6 +4,12 @@
 
 **当前版本 v2.0**：规则库 23 条（🔴 红 10 / 🟡 黄 11 / 🔵 蓝 2），AI Skill 与前端工具共用同一套规则。
 
+## 🔗 在线使用
+
+**👉 [点击在线使用 v2.0 审核工具](https://zrzbpsrpkw-hash.github.io/CRC-contract-review-3-Party/)**
+
+纯前端运行，合同文本仅在本地浏览器处理，不上传任何服务器。（如链接 404，请先在仓库 Settings → Pages 中选择 `main` 分支 `/ (root)` 开启 GitHub Pages。）
+
 ## 📦 仓库内容
 
 | 路径 | 说明 |
