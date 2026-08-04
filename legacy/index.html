@@ -40,15 +40,12 @@
       <div class="flex items-center gap-2">
         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <h1 class="text-xl font-bold text-gray-900">CRC三方协议智能审核系统</h1>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-900 text-white">v2.0</span>
-        <span class="text-xs text-gray-400 hidden md:inline">23 条规则（红 10 / 黄 11 / 蓝 2）· 与 AI Skill 规则库同步</span>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="loadDemo()" class="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 transition">加载示例</button>
         <button onclick="clearAll()" class="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 transition">清空</button>
       </div>
     </div>
-    <div class="max-w-6xl mx-auto px-4 pb-2 text-xs text-gray-400">本工具为关键词规则初筛，命中结果供定位参考；语义级复核（误报豁免、同义改写识别）请使用 AI Skill 版（crc-contract-review.skill）。</div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -187,9 +184,7 @@
           <span>7. 《中华人民共和国执业医师法》</span>
           <span>8. 《中华人民共和国民法典》</span>
           <span>9. 《中华人民共和国反不正当竞争法》</span>
-          <span>10. 《中华人民共和国劳动合同法》</span>
-          <span>11. 《中华人民共和国仲裁法》《中华人民共和国民事诉讼法》</span>
-          <span>12. 增值税发票管理相关规定及行业惯例</span>
+          <span>10. 《中华人民共和国刑法》（反商业贿赂相关条款）</span>
         </div>
       </div>
     </div>
@@ -199,241 +194,185 @@
     // ==================== 审核规则 ====================
     const rules = [
       {
-        id: 'RED-001', title: 'CRC职权边界-医学判断', level: 'red', category: 'CRC职权边界',
-        checkType: 'exist',
-        pattern: /医学判断|临床决策|治疗方案|因果关系|AE判断|SAE判断|病情评估|知情同意.{0,6}(解读|医学)|评估受试者|判断.{0,8}相关性|初步评估|预筛选/,
-        triggerText: '条款授权 CRC 从事需要医学专业判断的工作（病情评估、AE/SAE 因果关系判断、异常指标评估并决定是否上报等）',
-        desc: 'CRC 为非医学专业人员，无行医资质和医学决策权。授权 CRC 从事医学判断违反 GCP 及 2024 版专家共识，属重大合规瑕疵，可导致试验数据无效、行政处罚甚至受试者安全事件。',
-        suggestion: '删除该类授权表述，明确全部医学判断、临床决策、风险评估专属 PI/Sub-I 持证医务人员。',
-        basis: ['《药物临床试验质量管理规范（GCP）》', '《临床研究协调员实践和管理专家共识（2024版）》', '《药物临床试验CRC管理·广东共识（2024年版）》'],
-        clause: 'CRC 仅可从事本协议附件清单明确约定、经研究者书面授权、不涉及任何医学判断与诊疗处置的事务性辅助工作，无独立临床决策权、无医学处置权、无方案解释权。所有医学判断、临床决策、风险评估工作专属研究者承担。'
-      },
-      {
-        id: 'RED-002', title: 'CRC职权边界-医疗操作', level: 'red', category: 'CRC职权边界',
-        checkType: 'exist',
-        pattern: /抽血|采血|注射|给药|临床处置|医疗操作|病程记录|穿刺/,
-        triggerText: '条款安排 CRC 实施抽血、注射、给药、临床处置等需要执业资质的医疗操作',
-        desc: 'CRC 无医疗操作资质，授权其实施医疗操作违反《执业医师法》及 GCP 要求，构成非法行医风险，并直接威胁受试者安全。',
-        suggestion: '删除该类条款，明确医疗操作仅限持证医务人员执行，CRC 仅可从事不接触受试者身体的事务性辅助。',
-        basis: ['《执业医师法》', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '抽血、注射、给药、临床处置、病程记录书写等一切医疗操作仅限具备执业资质的医务人员执行。CRC 不得实施任何医疗操作，仅可协助药品/样本的交接登记、检查预约、文件传递等事务性辅助工作。'
-      },
-      {
-        id: 'RED-003', title: 'CRC职权边界-无限兜底', level: 'red', category: 'CRC职权边界',
-        checkType: 'exist',
-        pattern: /其他合理工作|额外协助工作|其他工作|未尽事宜|安排的其他任务|随时协助处理/,
-        triggerText: '条款以开放式、兜底式措辞界定 CRC 工作范围，未限定在"附件清单+书面授权+非医学判断"三重边界内',
-        desc: '开放式兜底条款可能导致 CRC 被要求从事超出法定职权范围（包括医学判断类）的工作，存在合规漏洞，且发生争议时工作边界无法举证。',
-        suggestion: '删除无限兜底表述，将工作范围收口为"附件清单 + PI 书面授权 + 非医学判断"三重限定。',
-        basis: ['《临床研究协调员实践和管理专家共识（2024版）》', '《药物临床试验CRC管理·广东共识（2024年版）》'],
-        clause: 'CRC 仅可从事本协议及附件清单明确约定、经研究者书面授权、不涉及医学判断的事务性辅助工作。任何超出本协议约定的新增工作，必须经各方书面确认，且不得突破 CRC 法定职权边界，否则无效。'
-      },
-      {
-        id: 'RED-004', title: '数据与知识产权归属', level: 'red', category: '数据与知识产权归属',
-        checkType: 'exist',
-        pattern: /共有|共同所有|共同享有|按贡献比例|服务方.{0,12}(使用权|收益权|发表)|用于(自身|学术)研究|成果发表/,
-        triggerText: '条款将试验数据、研究成果或知识产权约定为共有、归服务方所有，或赋予服务方使用权、收益权、发表权等数据权益',
-        desc: '临床试验数据及知识产权依法并依行业惯例应独家归申办方所有。约定共有或服务方享有权益，将导致数据资产权属争议、成果无法独占变现、合作僵局，且可能违反人类遗传资源管理要求。',
-        suggestion: '明确全部试验数据与知识产权独家归属申办方，服务方不因履约获得任何数据权益。',
-        basis: ['《药物临床试验质量管理规范（GCP）》', '《人类遗传资源管理条例》'],
-        clause: '申办方提供的全部项目资料、试验方案、涉密信息，及本项目履行过程中产生的全部临床试验数据、CRF 资料、样本数据、分析报告、研究成果及全部知识产权，所有权、使用权、处置权、收益权独家归申办方所有。服务方及 CRC 仅可为本项目履职需要有限使用，不得私自留存、复制、传播、对外披露或用于本项目以外任何用途。'
-      },
-      {
-        id: 'RED-005', title: '责任划分-责任免除/人事责任穿透', level: 'red', category: '责任划分与承担',
-        checkType: 'dual', missingLevel: 'yellow',
-        existPattern: /免除.{0,4}责任|不负.{0,4}责任|不承担.{0,4}责任|概不负责|责任上限|由.{0,4}(CRC|协调员).{0,4}(本人|个人)承担|已尽管理义务.{0,4}免责/,
-        missingPattern: /(始终|系|是).{0,6}服务方.{0,4}雇员|用人单位|社会保险|工资.{0,4}(福利|社保)|劳动关系/,
-        triggerText: '存在态：条款免除或限制服务方对 CRC 行为的赔偿责任（🔴）；缺失态：全文未明确 CRC 系服务方雇员及用人单位责任（🟡）',
-        desc: 'SMO/服务方作为 CRC 雇主，应对其履职行为承担全部兜底责任。免除或限制该责任违反权责对等原则，制造责任真空，发生数据瑕疵、合规处罚、第三方索赔时申办方将无法追偿；雇佣关系与人事责任不清，可能导致 CRC 与研究机构/申办方之间被认定事实劳动关系，引发劳动争议与连带用工责任。',
-        suggestion: '删除免责/限责表述，恢复服务方对 CRC 违规行为的全额赔偿责任；补充人事责任穿透条款。',
-        basis: ['《药物临床试验质量管理规范（GCP）》', '《药物临床试验CRC管理·广东共识（2024年版）》', '《劳动合同法》'],
-        clause: '服务方应对 CRC 故意、过失、违规、违约行为导致的项目延误、数据瑕疵、合规处罚、第三方损失承担全部赔偿责任，包括但不限于行政处罚、第三方索赔、数据无效等全部后果。服务方指派的 CRC 始终是服务方雇员，服务方应自行负责该雇员的工资、福利及社会保险等一切事宜，并承担作为用人单位的所有责任和义务。CRC 与申办方、研究机构之间不建立任何劳动、劳务或雇佣关系。'
-      },
-      {
-        id: 'RED-006', title: '转包与分包限制', level: 'red', category: '转包与分包限制',
-        checkType: 'exist',
-        pattern: /允许.{0,6}(转包|分包)|自行委托|交由.{0,6}(合作机构|第三方|关联)|委托.{0,6}关联|分包商|转让.{0,6}第三方/,
-        triggerText: '条款允许服务方转包、分包、委托第三方履行，且未同时具备"事先书面同意+连带责任"双重约束',
-        desc: '擅自转包分包导致服务质量失控、人员资质无法保证、合规风险外溢，且实际服务主体与签约主体脱节，发生问题时追责链条断裂。',
-        suggestion: '禁止擅自转包分包；经同意的分包必须约定服务方承担全部连带责任。',
-        basis: ['《药物临床试验质量管理规范（GCP）》', '《药物临床试验CRC管理·广东共识（2024年版）》'],
-        clause: '未经申办者和研究机构事先书面同意，服务方不得使用任何分包商、代理商/代理人或其他第三方履行本协议项下义务，也不得将本协议项下权利或义务转让给任何第三方。即使经同意使用第三方，服务方应在其与第三方的合同中要求该第三方严格遵守本协议约定，并直接对该第三方的履行行为承担完全连带责任，分包成本与风险由服务方自行承担。'
-      },
-      {
-        id: 'RED-007', title: '资质授权-PI书面授权', level: 'red', category: 'CRC资质与授权',
-        checkType: 'missing',
-        pattern: /(PI|主要研究者|研究者).{0,8}书面授权|职责授权表|授权分工表/,
-        triggerText: '全文未要求派驻 CRC 取得 PI（主要研究者）书面授权方可上岗履职',
-        desc: 'PI 书面授权是 CRC 履职的法定前提。缺失授权条款，CRC 工作的合法性存疑，监查、稽查时无法证明分工合规，违反 GCP 及专家共识。',
-        suggestion: '补充 PI 书面授权条款。',
+        id: 'RED-001', title: 'CRC职权越权', level: 'red', category: 'CRC职权越权',
+        pattern: /医学判断|临床决策|治疗方案决策|AE判断|SAE判断|因果关系判断|知情同意.*医学解读/,
+        desc: 'CRC为非医学专业人员，无行医资质和医学决策权。根据GCP及《临床研究协调员实践和管理专家共识（2024版）》，CRC仅可从事经PI书面授权的事务性辅助工作。任何涉及医学判断、临床决策、医疗操作的授权均属重大合规瑕疵，可导致数据无效、行政处罚甚至非法行医风险。',
         basis: ['《药物临床试验质量管理规范（GCP）》', '《临床研究协调员实践和管理专家共识（2024版）》'],
-        clause: '所有派驻 CRC 需取得研究者书面授权，明确具体工作范围和权限边界，未经授权的工作一律不得开展。授权范围变更须经研究者书面更新确认。'
+        clause: `CRC仅可从事以下经PI书面授权、不涉及医学判断的事务性辅助工作：
+（1）遵守《药物临床试验质量管理规范》和相关法律法规及《临床研究方案》的规定，协助研究者完成相关工作；
+（2）协助进行临床试验启动前相关工作，包括准备立项和伦理审查资料，跟踪进度，协调项目启动会等；
+（3）协助研究者进行数据管理，包括进行原始资料/数据的收集与管理，在规定的时限内基于原始资料/数据相关信息填写病例报告表(CRF或eCRF)并协助数据质询解答，保证数据的完整性等；
+（4）协助研究者进行文档管理，包括协助完成研究资料的收集、整理、归档和管理工作，伦理审查材料的递交和签字文件收集等；
+（5）协助研究者进行试验参与者管理，包括招募试验参与者，根据研究方案协助研究者合理安排试验参与者访视，安排各项检查及获取检查结果，并联系提醒试验参与者按时回访等；
+（6）协助研究者进行安全信息管理，包括提醒研究者审阅检查报告单、试验参与者日记，提醒研究者及时处理不良事件（AE）、严重不良事件（SAE）、可疑且非预期严重不良反应（SUSAR）、特殊关注事件（AESI）、妊娠事件等，协助研究者完成相关记录和报告等；
+（7）协助研究者进行药品/医疗器械管理，包括药品/医疗器械接收、存储、发放、回收、记录等；
+（8）协助研究者进行研究物资管理，包括进行中心实验室耗材的申请、预定和管理等；
+（9）协助研究者进行样本管理，包括标本制备、采集、处理、分装、存储、运输、记录等；
+（10）协助研究者进行监管管理，包括配合监查、稽查与检查相关工作等；
+（11）协助研究者进行沟通管理，包括协助研究者与研究机构、申办者、CRO等相关方进行协调沟通（邮件、即时通讯软件、短信、口头、传真等）并记录等。
+
+CRC所有工作均为研究者辅助工作，无独立决策权、无医学处置权、无方案解释权，所有临床决策、医学判断均由PI/Sub-I独立完成并承担责任。任何超出本协议约定的新增工作，必须经各方书面确认，且不得突破CRC法定职权边界，否则无效。`
       },
       {
-        id: 'RED-008', title: '人员更换-单方更换权', level: 'red', category: '人员更换管理',
-        checkType: 'dual', missingLevel: 'red',
-        existPattern: /协商一致.{0,6}更换|不得单方(面)?(要求)?更换|需经服务方同意|服务方书面认可|共同确认后.{0,4}更换/,
-        missingPattern: /(?<!不得)(?<!限制)单方.{0,4}更换|有权.{0,6}更换.{0,8}(无需|通知)/,
-        triggerText: '条款将更换 CRC 设置为需服务方同意或协商一致，限制/排除申办方和研究机构的单方更换权；或对更换权完全未作约定',
-        desc: '申办方和研究机构作为项目管理方和现场监管方，必须有权单方更换不合格 CRC。更换权受限将导致人员管理失控，出现履职不当、合规风险时无法及时止损。',
-        suggestion: '删除协商一致限制，明确单方更换权及配套时限。',
-        basis: ['《临床研究协调员实践和管理专家共识（2024版）》', '《药物临床试验CRC管理·广东共识（2024年版）》'],
-        clause: '若派驻 CRC 存在履职不力、能力不达标、违规操作、超出职权范围、引发合规风险等情形，申办者及研究机构有权单方要求更换 CRC，提前 14 日书面通知服务方即可，无需服务方同意。服务方需在 14 日内推送合格备选人员，经申办方及研究机构审核确认后方可上岗，双方有权无条件否决不合格人员。'
+        id: 'RED-002', title: 'CRC越权操作', level: 'red', category: 'CRC职权越权',
+        pattern: /抽血|注射|临床处置|医疗操作|病程记录书写/,
+        desc: 'CRC无医疗操作资质。协议授权CRC进行医疗操作违反《执业医师法》及GCP要求，构成非法行医风险。所有医疗操作仅限持有执业医师资格的PI/Sub-I执行。',
+        basis: ['《执业医师法》', '《药物临床试验质量管理规范（GCP）》'],
+        clause: 'CRC无医疗操作资质，不得进行任何医疗操作。所有医疗操作（包括但不限于抽血、注射、临床处置、病程记录书写等）仅限PI/Sub-I等持证医务人员执行。'
       },
       {
-        id: 'RED-009', title: '数据合规专项条款', level: 'red', category: '数据合规与个人信息保护',
-        checkType: 'missing',
-        pattern: /数据安全法|个人信息保护|人类遗传资源|受试者.{0,6}信息保护|数据泄露/,
-        triggerText: '全文缺少数据安全与个人信息保护专项条款（笼统保密条款不能替代受试者个人信息保护义务）',
-        desc: '临床试验涉及大量受试者个人敏感信息及可能的人类遗传资源数据，缺失数据合规专项条款违反法律法规强制性要求，存在数据泄露、行政处罚、刑事风险，且责任无法向服务方追偿。',
-        suggestion: '补充数据安全与个人信息保护专项条款，明确服务方兜底责任。',
-        basis: ['《数据安全法》', '《个人信息保护法》', '《人类遗传资源管理条例》'],
-        clause: '服务方需全面遵守《数据安全法》《个人信息保护法》《人类遗传资源管理条例》及 GCP 数据合规要求，对数据泄露、违规处理引发的全部处罚、损失、赔偿责任独立兜底承担。项目结束后，服务方应按要求移交全部数据资料，不得私自留存任何涉密数据、试验资料或受试者信息。'
-      },
-      {
-        id: 'RED-021', title: '资质授权-审核否决权', level: 'red', category: 'CRC资质与授权',
-        checkType: 'missing',
-        pattern: /审核确认|准入审核|否决权|审核(确认|通过)后方可上岗|背景审核/,
-        triggerText: '全文未赋予申办方和研究机构对派驻 CRC 人员的审核确认权与最终否决权',
-        desc: '缺失人员审核与否决权，导致人员准入失控，资质不符、背景存疑的 CRC 可能直接上岗，直接影响数据质量与合规状态。',
-        suggestion: '补充人员审核确认与最终否决权条款。',
-        basis: ['《临床研究协调员实践和管理专家共识（2024版）》', '《药物临床试验CRC管理·广东共识（2024年版）》'],
-        clause: '所有派驻 CRC 需满足医药、护理、生物等相关专业大专以上学历、持有效 GCP 培训合格证书、具备相应项目经验，经申办方/CRA 书面审核确认、研究机构背景审核与技能考核通过后方可上岗。'
-      },
-      {
-        id: 'RED-010', title: '费用支付风控（双情形）', level: 'yellow', category: '费用支付与风控',
-        checkType: 'scenario',
-        pattern: /一次性支付(全部|所有)|一次性付清|全额预付|预付.{0,6}(100|全部)|100%.{0,6}预付|无质保金|生效后.{0,8}日内.{0,4}支付全部|签约.{0,8}一次性/,
-        triggerText: '情况一：约定费用支付另行签署两方协议，但缺少研究机构认可或增值税专用发票约定；情况二：付款安排与履约成果脱钩（全额/高比例预付、无里程碑绑定、无质保金）',
-        desc: '情况一要素不全时，研究机构作为协议方对费用安排未予认可、税务与发票责任不清，易引发三方争议与结算障碍；情况二全额或高比例预付且无质保金，使付款方完全丧失合同履行控制权，款项付讫后服务质量与进度失控，违约时资金难以追回。',
-        suggestion: '情况一补齐研究机构认可与增值税专用发票约定；情况二设置与里程碑绑定的付款节点，预留质保尾款，建立违约扣款机制。',
-        basis: ['行业惯例', '《药物临床试验CRC管理·广东共识（2024年版）》', '增值税发票管理相关规定'],
-        clause1: '服务费的具体支付事宜，由申办者和服务方另行签署协议约定（"CRC 服务两方协议"），研究机构对此予以认可。服务方应就申办者应付的所有服务费用向申办者开具增值税专用发票。',
-        clause2: '服务费用按里程碑支付：合同生效后支付预付款【】%即人民币【】元；首名受试者入组/项目启动后经申办方书面验收支付进度款【】%即人民币【】元；数据锁库/现场稽查通过后支付进度款【】%即人民币【】元；项目归档完成且资料移交验收合格后支付剩余质保尾款【】%即人民币【】元。总费用为人民币【】元，大写：【】。所有付款均以申办方书面验收确认为前提。若服务方未按约定履行义务，申办方有权根据违约情况相应扣减服务费用，直至损失得到足额弥补。'
-      },
-      {
-        id: 'RED-011', title: '变更控制（口头变更/机制缺失）', level: 'yellow', category: '费用支付与风控',
-        checkType: 'dual', missingLevel: 'yellow',
-        existPattern: /口头(同意|协商|确认)|无需书面|无书面确认|电话确认|沟通确认后执行|事后补办/,
-        missingPattern: /书面补充协议|补充协议.{0,8}(唯一依据|依据|为准)/,
-        triggerText: '存在态：条款允许以口头、无书面形式变更工作范围、工作量或费用；缺失态：全文未建立任何书面变更控制机制',
-        desc: '口头变更或变更控制机制缺失，导致合同变更随意性大、缺乏证据支撑，工作量与费用缺乏调整依据，费用争议、审计核查时无法举证，易引发纠纷，无法保障各方权益。',
-        suggestion: '变更为书面补充协议唯一依据；未建立变更机制的，补充变更控制条款。',
-        basis: ['《药物临床试验质量管理规范（GCP）》文件管理要求'],
-        clause: '任何工作范围调整、方案变更导致的工作量增减及费用调整，必须以双方签署的书面补充协议为唯一依据，无书面协议不予调价、不予执行。'
-      },
-      {
-        id: 'RED-013', title: '保密条款', level: 'yellow', category: '保密条款',
-        checkType: 'missing',
-        pattern: /保密/,
-        requirePattern: /期限|终止后|丧失秘密性|泄密|违约责任/,
-        triggerText: '全文缺少保密条款，或保密条款未覆盖范围/期限/违约责任三要素',
-        desc: '临床试验涉及大量商业秘密与受试者隐私，保密条款缺失或期限不明违反《反不正当竞争法》及伦理要求，信息泄露后无法追责。',
-        suggestion: '补充/完善保密条款三要素。',
-        basis: ['《反不正当竞争法》', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '未经申办者事先书面同意，研究机构及服务方不得将本协议内容、为起草本协议交换的信息以及履行过程中知悉、获得或产生的任何数据、文档、信息和报告透露、转让给任何第三方或许可任何第三方透露、使用。本协议终止后，保密义务继续有效直至相关保密信息丧失秘密性。服务方人员（含分包第三方）泄密视同服务方违约，由服务方承担全部赔偿责任。'
-      },
-      {
-        id: 'RED-014', title: '反商业贿赂', level: 'yellow', category: '反商业贿赂',
-        checkType: 'missing',
-        pattern: /反商业贿赂|廉洁|不正当利益|利益输送/,
-        triggerText: '全文未包含反商业贿赂/廉洁从业承诺，或未约定违反后的根本违约后果',
-        desc: '临床试验是反商业贿赂重点监管领域，缺失该条款存在合规短板，且无法以服务方行贿为由行使单方解除权。',
-        suggestion: '补充反商业贿赂条款并绑定根本违约后果。',
-        basis: ['反商业贿赂相关法律法规', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '服务方承诺严格遵守反商业贿赂相关法律法规，不得向研究机构人员、申办方人员进行任何形式的贿赂或利益输送。若服务方违反本条约定，属于根本违约，申办方有权单方解除协议，并要求服务方承担全部损失赔偿责任。'
-      },
-      {
-        id: 'RED-015', title: 'GCP合规承诺', level: 'yellow', category: 'GCP合规承诺',
-        checkType: 'missing',
-        pattern: /GCP|药物临床试验质量管理规范|ICH/,
-        requirePattern: /审计|核查|记录/,
-        triggerText: '全文未要求服务方承诺遵守 GCP/ICH-GCP，或未约定合规记录保留与接受申办方审计的义务（提及≠承诺）',
-        desc: 'GCP 是临床试验核心合规要求，缺失合规承诺与审计权条款，服务方履约缺乏法规锚点，申办方无法核查其合规状态。',
-        suggestion: '补充 GCP 合规承诺、记录保存与审计条款。',
-        basis: ['《药物临床试验质量管理规范（GCP）》'],
-        clause: '服务方在履行本协议过程中，应遵守中国药品/医疗器械/诊断试剂监督管理相关法律法规（包括但不限于《药物临床试验质量管理规范》）和 ICH-GCP 指南的规定，按照临床研究方案及本协议要求提供尽职、谨慎的服务。服务方应保留能证明其遵守本协议规定的记录及相关支持文件，并同意申办者有权在合理事先通知后随时审计服务方的全部相关记录。'
-      },
-      {
-        id: 'RED-017', title: '交接标准', level: 'yellow', category: '交接标准',
-        checkType: 'missing',
-        pattern: /交接/,
-        requirePattern: /不少于|周|时限|台账|交接不力|归还/,
-        triggerText: '全文未约定 CRC 更换或服务结束时的交接时限、交接内容、交接周期及交接不力的违约责任',
-        desc: '缺失交接标准，人员变更时易发生数据丢失、工作断层、SAE 延报漏报，影响项目连续性且责任无法追溯。',
-        suggestion: '补充交接标准与交接不力违约责任。',
-        basis: ['《临床研究协调员实践和管理专家共识（2024版）》', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '服务结束或 CRC 变更时，服务方应负责督促 CRC 完成完整资料交接、数据核对、工作台账移交，归还工作卡、工作服等物资，新旧 CRC 交接时间不少于 2 周，确保问题闭环、无数据丢失、无流程断层。因 CRC 擅自离职、交接不力或其他个人原因导致材料延迟递交、资料遗失、SAE 延报漏报、数据缺失等后果的，由服务方承担全部责任。'
-      },
-      {
-        id: 'RED-018', title: '违约责任完整性', level: 'yellow', category: '违约责任',
-        checkType: 'missing',
-        pattern: /违约责任|违约金|(?<!免除)(?<!不承担)(?<!不负)赔偿/,
-        triggerText: '全文缺失违约责任条款，或违约情形列举不完整、无补正期限/解除权/赔偿范围等救济路径',
-        desc: '违约责任空泛或不完整，导致违约行为无法追责、损失无法量化索赔，合同约束力不足。',
-        suggestion: '完善违约情形清单与分层救济机制。',
-        basis: ['《民法典》合同编', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '违约情形包括但不限于：服务方派驻 CRC 资质不符合要求；擅自更换 CRC 或更换流程不符合约定；CRC 超出职权范围从事医学判断类工作；擅自转包、分包本协议项下服务；泄露保密信息或违规处理数据；逾期履行或交接不力。守约方有权要求违约方在合理期限内补正或采取补救措施；违约方在守约方书面通知后十五（15）日内仍未补正或采取补救措施的，守约方有权经书面通知立即终止本协议；违约方应赔偿其违约行为给守约方造成的全部损失和费用。'
-      },
-      {
-        id: 'RED-022', title: '数据移交', level: 'yellow', category: '数据合规与个人信息保护',
-        checkType: 'missing',
-        pattern: /移交.{0,6}(数据|资料)|(数据|资料).{0,4}移交|不得(私自)?留存|归还/,
-        triggerText: '全文未约定项目结束（或终止）时服务方移交全部数据资料、不得私自留存的义务',
-        desc: '缺失数据移交条款，服务方可能私自留存涉密数据、试验资料或受试者信息，侵犯申办方知识产权并构成数据合规风险。',
-        suggestion: '补充数据移交与禁止留存条款。',
-        basis: ['《数据安全法》', '《个人信息保护法》', '《药物临床试验质量管理规范（GCP）》'],
-        clause: '项目结束或本协议终止后【15】日内，服务方应按要求向申办方移交全部数据资料，并删除/销毁其留存的全部副本，不得私自留存任何涉密数据、试验资料或受试者信息，且应出具书面移交与销毁确认。'
-      },
-      {
-        id: 'RED-023', title: '人员稳定性', level: 'yellow', category: '人员更换管理',
-        checkType: 'missing',
-        pattern: /人员稳定|不得擅自(更换|换人)|相对固定/,
-        triggerText: '全文未对 CRC 人员稳定性作任何要求，服务方可随意更换派驻人员',
-        desc: 'CRC 频繁更换影响项目连续性与数据质量，增加培训与交接成本，无稳定性约束时服务方可随意换人。',
-        suggestion: '补充人员稳定性条款。',
+        id: 'RED-003', title: '工作范围无限兜底', level: 'red', category: 'CRC职权越权',
+        pattern: /其他合理工作|额外协助工作|其他工作|未尽事宜/,
+        desc: '开放式兜底条款可能导致CRC被要求从事超出法定职权范围的工作（包括但不限于医学判断、医疗操作、方案解释等），存在合规漏洞和法律风险。CRC工作范围必须经PI书面授权并明确列举。',
         basis: ['《临床研究协调员实践和管理专家共识（2024版）》'],
-        clause: '本协议履行期间，服务方派驻 CRC 需保持人员稳定，原则上仅因 CRC 产假、长病假、正常离职可申请更换，其余情形不得擅自换人。若需更换，服务方需提前 30 日书面告知申办者及研究机构，经书面同意后方可启动交接。'
+        clause: 'CRC仅可从事本协议及附件清单明确约定、经PI书面授权、不涉及医学判断的事务性辅助工作。任何超出本协议约定的新增工作，必须经各方书面确认，且不得突破CRC法定职权边界，否则无效。'
       },
       {
-        id: 'RED-024', title: '重大事件报告', level: 'yellow', category: 'GCP合规承诺',
-        checkType: 'missing',
-        pattern: /重大事件|24 ?小时|及时报告|SAE.{0,4}(报告|上报)/,
-        triggerText: '全文未约定服务方对重大事件（SAE、重大异常、监管检查、政策变动等）的及时报告义务与时限',
-        desc: '重大事件未及时报告可能导致 SAE 延报、漏报，违反 GCP 报告时限要求，引发监管处罚。',
-        suggestion: '补充重大事件报告条款。',
+        id: 'RED-004', title: '数据权属争议', level: 'red', category: '数据与责任',
+        pattern: /数据.*共有|共同所有|知识产权.*共有|SMO.*所有权|SMO.*使用权|服务方.*收益权/,
+        desc: '临床试验数据及知识产权依法应归申办方所有。约定共有或SMO/服务方享有权益违反行业惯例及合规要求，可能导致数据资产无法变现、合作僵局，甚至引发知识产权诉讼。',
+        basis: ['《药物临床试验质量管理规范（GCP）》', '《数据安全法》'],
+        clause: `1. 知识产权归属\n所有由申办者提供的数据、文档和信息（"申办者信息"）以及由此衍生的数据、文档、信息，其所有权和知识产权属于申办者。\n\n在临床研究期间获得的所有数据、CRF、实验室结果、报告、展示、此类数据的以及任何其他信息的评估与分析、文件、临床试验中构思、创造或生成的专有技术和结果、所有版权和其中其他的知识产权（"研究成果"），包括但不限于书面的、打印的、图片的、多媒体材料和计算机数据库或计算机可阅读形式中包含的信息，其所有权、知识产权归申办者所有。\n\n服务方不因履行本协议而获得任何知识产权和数据权益。\n\n2. 数据使用限制\n服务方及CRC仅可基于本项目履职需要有限使用上述数据和信息，不得以任何形式自行使用、复制、传播、外泄或用于本项目以外任何用途。\n\n3. 数据合规义务\n服务方需全面遵守《数据安全法》《个人信息保护法》《人类遗传资源管理条例》及GCP数据合规要求，对数据泄露、违规处理引发的全部处罚、损失、赔偿责任独立兜底承担。\n\n4. 资料移交\n项目结束后，服务方应按要求移交全部数据资料，不得私自留存任何涉密数据、试验资料或受试者信息。`
+      },
+      {
+        id: 'RED-005', title: '责任免除', level: 'red', category: '数据与责任',
+        pattern: /免除.*责任|不负.*责任|不承担.*责任/,
+        desc: 'SMO/服务方作为CRC雇主，应对CRC履职行为承担全部兜底责任。免除其赔偿责任违反权责对等原则，导致责任真空。CRC造成的行政处罚、第三方索赔、数据无效等后果均应由服务方独立承担。',
+        basis: ['《民法典》', '《药物临床试验质量管理规范（GCP）》'],
+        clause: `服务方指派的CRC将始终是服务方的雇员，服务方应自行负责该雇员的工资、福利及社会保险等一切事宜，并承担作为用人单位的所有责任和义务。CRC造成的损失（包括自身受到的意外伤害、原始资料丢失、患者样本采集与保存有误、未经研究者允许私自开展工作等），由服务方承担相应后果。服务方CRC违规操作导致的行政处罚、第三方索赔、数据无效等全部后果，由服务方独立承担。`
+      },
+      {
+        id: 'RED-006', title: '擅自转包', level: 'red', category: '数据与责任',
+        pattern: /允许转包|允许分包/,
+        desc: '擅自转包CRC服务可能导致服务质量失控、人员资质无法保证、合规风险外溢。未经申办方和研究机构书面同意的转包/分包属于重大违约。',
         basis: ['《药物临床试验质量管理规范（GCP）》'],
-        clause: '服务方知悉发生重大事件（包括但不限于严重不良事件、重大方案偏离、监管检查、影响项目的政策变动）后，应在 24 小时内与申办者及研究机构沟通报告，并配合采取相应措施。因迟报、漏报导致的后果由服务方承担责任。'
+        clause: `未经申办者和研究机构的事先书面同意，服务方不得使用任何分包商、代理商/代理人或者其他第三方以履行本协议项下的义务，也不得将本协议项下的权利或者义务转让给任何第三方。即使申办者和研究机构同意服务方使用分包商、代理商/代理人或者其他第三方履行本协议项下的义务，服务方应在同第三方的合同中要求该等第三方也严格遵守本协议约定，并直接对该等第三方的履行行为承担完全责任。如发现该等第三方违反了相关规定，服务方应立即通知申办者和研究机构，并根据申办者和研究机构的要求采取进一步的措施。服务方应自行承担与分包相关的所有费用和成本。`
       },
       {
-        id: 'RED-026', title: '申办方终止权', level: 'yellow', category: '协议解除与终止',
-        checkType: 'missing',
-        pattern: /(提前)?.{0,4}(三十|30).{0,2}(天|日).{0,8}(终止|解除)|无理由.{0,4}(终止|解除)|随时.{0,4}(终止|解除)|联动终止|本协议(也)?立即终止/,
-        triggerText: '全文未赋予申办方经提前书面通知无理由终止协议的权利，或未约定与临床试验研究合同/CRC 服务两方协议的联动终止',
-        desc: '缺失申办方终止权，项目暂停、终止或合作安排变化时申办方无法及时退出，须继续支付服务费或陷于履约僵局；临床试验研究合同或两方协议终止而三方协议存续，将产生义务错配与费用争议。',
-        suggestion: '补充申办方任意终止权与联动终止条款。',
-        basis: ['《民法典》合同编', '行业惯例'],
-        clause: '1、申办者有权在提前三十（30）天书面通知后，随时无理由终止本协议。协议终止后，申办者应向服务方支付截至终止之日已提供的服务所涉及的服务费。\n2、如申办者与研究机构签署的临床试验研究合同提前终止，或申办者与服务方签署的CRC服务两方协议提前终止，则本协议也立即终止。'
-      },
-      {
-        id: 'RED-016', title: '鉴于条款与项目依据', level: 'blue', category: '鉴于条款与项目依据',
-        checkType: 'missing',
-        pattern: /(审批|受理)(文号|号)|批件|伦理.{0,6}(审批|批准|批件)|主要研究者.{0,4}(为|：|:)/,
-        triggerText: '鉴于条款（或协议首部）未列明临床试验审批/受理文号、伦理审批文号、主协议及主要研究者信息',
-        desc: '缺少合法项目依据，无法证明"申办方合法立项→监管/伦理许可→委托 SMO 提供服务"的签约逻辑链条完整，存在合同效力瑕疵风险；主体资质承诺缺失则无法在服务方失信时行使解除权。',
-        suggestion: '补充完整项目依据与主体资质承诺。',
+        id: 'RED-007', title: '授权缺失', level: 'yellow', category: '授权与人员',
+        pattern: /PI.*授权|职责授权表|书面授权/,
+        desc: 'PI书面授权是CRC履职的法定前提条件。缺失授权条款违反GCP及专家共识，CRC工作合法性存疑，可能导致数据不被监管机构接受。',
         basis: ['《药物临床试验质量管理规范（GCP）》'],
-        clause: '鉴于：申办者与研究机构就开展【XXX 临床研究】订立正式临床试验主协议（临床试验审批/受理文号：【 】；伦理审批文号：【 】），本项目主要研究者为【XX】。为保障临床试验数据真实准确、研究文件完整规范、项目有序推进，申办方委托具备合法资质的 SMO/服务方指派合规临床研究协调员（CRC），协助研究机构开展非医学判断类事务性辅助工作。申办方按本协议约定向服务方支付对应服务费用。各方本着平等自愿、合规守法原则，依据相关法律法规及行业指南，协商一致订立本协议。\n\n服务方保证自身经营合法、无严重违法失信及违规执业记录，具备 CRC 服务专业能力；若存在失信、资质瑕疵、超范围经营情形，申办方有权单方解除协议并追索全部损失。'
+        clause: '所有派驻CRC需取得PI书面授权（以《职责授权表》为唯一依据），明确具体工作范围和权限边界。CRC所有工作均需在PI授权范围内进行，超出授权范围的工作无效。'
       },
       {
-        id: 'RED-025', title: '争议解决', level: 'blue', category: '违约责任/通用条款',
-        checkType: 'missing',
-        pattern: /仲裁|管辖|诉讼|争议解决/,
-        triggerText: '全文争议解决条款缺失，或约定或裁或审、仲裁机构无全称、管辖地对申办方明显不利',
-        desc: '争议解决条款无效或不利，发生纠纷时将陷入管辖争议，增加维权成本与不确定性。',
-        suggestion: '优先约定申办方所在地法院管辖；如选仲裁，必须写明仲裁机构全称。',
-        basis: ['《仲裁法》', '《民事诉讼法》'],
-        clause: '因本协议引起的或与本协议有关的一切争议，各方应友好协商解决；协商不成的，任何一方均可向申办方所在地有管辖权的人民法院提起诉讼。（如采用仲裁：协商不成的，提交【仲裁委员会全称】按其届时有效的仲裁规则仲裁，仲裁裁决为终局裁决。）'
+        id: 'RED-008', title: '更换权受限', level: 'yellow', category: '授权与人员',
+        pattern: /双方协商一致方可更换|需经.*同意方可更换/,
+        desc: '申办方和研究机构作为项目管理方和现场监管方，应有权单方更换不合格CRC。限制更换权导致人员管理失控，影响项目质量和数据可靠性。',
+        basis: ['《临床研究协调员实践和管理专家共识（2024版）》'],
+        clause: `1. 人员稳定性要求\n服务方应指派相对稳定的CRC，指派的CRC原则上除产假、长病假、离职外不能更换。\n\n2. 服务方主动更换\n若服务方需更换CRC，必须提前一个月通知申办者及研究机构，获得申办者及研究机构同意后方可进行交接。更换后的CRC与原CRC应该至少有2周的交接时间，以保证项目开展的稳定性和连续性。更换后的CRC需经申办者及研究机构认可后方能上岗，申办者及研究机构有权拒绝不合格的CRC。\n\n3. 申办方/机构要求更换\n在本协议履行期限内，如服务方提供的CRC不能胜任CRC服务、存在履职不当、违规操作、能力不足、合规风险等情形，申办者及研究机构有权单方要求更换CRC，但应至少提前2周通知服务方。服务方有义务在2周的时间内提供新的合格人选并经过申办者和研究机构同意。\n\n4. 责任承担\n若因CRC擅自离职、交接不力或其他个人原因延迟材料递交、遗失资料、SAE延报漏报、数据缺失等不配合试验开展的情况，所导致的后果由服务方承担全部责任。`
+      },
+      {
+        id: 'RED-009', title: '数据合规缺失', level: 'yellow', category: '合规风控',
+        pattern: /数据安全|个人信息保护|数据合规/,
+        desc: '临床试验涉及大量受试者个人敏感信息。缺失数据合规条款违反法律法规要求，存在数据泄露、行政处罚风险，可能导致项目被监管机构叫停。',
+        basis: ['《数据安全法》', '《个人信息保护法》', '《人类遗传资源管理条例》'],
+        clause: `服务方在处理病患健康信息、医疗信息和其他个人信息（包括但不限于身体部位影像资料、检验检查资料、病历资料等）时，必须遵循相关法律法规以保护试验参与者的隐私。不得将试验参与者的病历资料、信息等其他个人信息通过任何方式带出或传出研究机构之外。若服务方从研究机构调阅和拿走任何试验资料，均需事先取得申办者和研究机构的书面同意，且有资料调阅和交接记录，如有违反，将承担相关法律责任。服务方需全面遵守《数据安全法》《个人信息保护法》《人类遗传资源管理条例》及GCP数据合规要求，对数据泄露、违规处理引发的全部处罚、损失、赔偿责任独立兜底承担。`
+      },
+      {
+        id: 'RED-010', title: '付款无风控', level: 'yellow', category: '合规风控',
+        pattern: /预付款.*100%|全额预付|无质保金/,
+        desc: '全额预付且无质保金导致付款方完全丧失合同履行控制权，存在款项付讫后服务质量失控风险。建议采用分阶段付款，尾款与项目里程碑挂钩。',
+        basis: ['《民法典》'],
+        clause: `1. 服务费用\n本协议项下CRC服务费用约为【XX】人民币（大写【XX】），该费用为【含税/不含税】价格。\n\n2. 支付方式\n服务方应就申办方应付的所有服务费用向申办方开具合规增值税专用发票，申办方收到正确发票后30日内支付至服务方指定账户。\n\n3. 付款节点\n（1）合同生效后【X】日内，支付总费用的【X】%作为预付款；\n（2）【首名受试者入组/项目启动】后【X】日内，支付总费用的【X】%；\n（3）【数据锁库/现场稽查通过】后【X】日内，支付总费用的【X】%；\n（4）项目归档完成后【X】日内，支付剩余【X】%质保金。\n\n4. 变更控制\n任何工作范围调整、方案变更导致的工作量增减，必须以双方书面补充协议为唯一依据，无书面协议不予调价。\n\n5. 违约扣款\n若服务方未按约定履行义务，申办方有权根据违约情况相应扣减服务费用，直至损失得到足额弥补。`
+      },
+      {
+        id: 'RED-011', title: '变更无控制', level: 'yellow', category: '合规风控',
+        pattern: /无书面确认|无需书面|口头.*同意/,
+        desc: '口头变更或无书面确认机制导致合同变更缺乏证据支撑，易引发争议和审计风险。临床试验项目周期长、变更多，必须有严格的变更控制程序。',
+        basis: ['《民法典》'],
+        clause: '任何工作范围调整、方案变更导致的工作量增减，必须以双方书面补充协议为唯一依据，无书面协议不予调价。本协议的任何修改、变更或补充均需经各方书面同意后方可生效。'
+      },
+      {
+        id: 'RED-012', title: '变更管理缺失', level: 'yellow', category: '合规风控',
+        pattern: /变更控制|书面变更|补充协议/,
+        desc: '缺失变更控制机制导致合同变更随意性大，无法保障各方权益。CRC服务的工作量与方案复杂度、入组人数直接相关，无变更控制易发生费用争议。',
+        basis: ['《民法典》'],
+        clause: '本协议的任何修改、变更或补充均需经各方书面同意后方可生效。任何工作范围调整、方案变更导致的工作量增减，必须以双方书面补充协议为唯一依据，无书面协议不予调价。'
+      },
+      {
+        id: 'RED-013', title: '保密条款缺失', level: 'yellow', category: '专项合规',
+        pattern: /保密条款|保密义务|保密期限/,
+        desc: '临床试验涉及大量商业秘密和受试者隐私。缺失保密条款违反《反不正当竞争法》及伦理要求，一旦泄密将面临行政处罚和民事赔偿。',
+        basis: ['《反不正当竞争法》', '《药物临床试验质量管理规范（GCP）》'],
+        clause: `1. 保密义务\n未经申办者事先书面同意，研究机构及服务方不得将本协议的内容、为起草本协议而交换的信息以及在履行本协议过程中知悉、获得或者产生的任何数据、文档、信息和报告（"保密信息"）透露、或转让给任何第三方或许可任何第三方透露、使用或转让。\n\n本协议终止后，本条规定的保密义务应继续有效直至相关保密信息丧失秘密性，本保密义务不以本协议或者临床试验协议的终止、解除、届满而消灭。如果违反本条规定，应承担由此给申办者造成的所有损失。\n\n2. 例外情形\n尽管有前述规定，研究机构及服务方仍可向其人员透露保密信息，但这种透露应当是研究机构及服务方为履行其在本协议下的义务所必需的，并且应使上述人员同意承担与本协议中所包含的保密义务同样或更严格的保密义务。研究机构及服务方的人员所造成的任何保密信息的泄漏应视为研究机构及服务方泄密，仍应由研究机构及服务方直接承担责任。\n\n如此项披露是应法院或行政机关要求进行的，研究机构及服务方不承担以上责任，但应立即通知申办者，且该项披露应事先获得申办者的同意，并应保持在必须且最小的范围内。`
+      },
+      {
+        id: 'RED-014', title: '反商业贿赂缺失', level: 'yellow', category: '专项合规',
+        pattern: /反商业贿赂|商业贿赂/,
+        desc: '临床试验领域是反商业贿赂重点监管对象。缺失反商业贿赂条款存在合规风险，可能触发刑事调查，对各方声誉造成不可逆损害。',
+        basis: ['《反不正当竞争法》', '《刑法》'],
+        clause: '服务方承诺严格遵守反商业贿赂相关法律法规，不得向研究机构人员、申办方人员进行任何形式的贿赂、利益输送。若服务方违反本条约定，属于根本违约，申办方有权单方解除协议，并要求服务方承担全部损失赔偿责任。'
+      },
+      {
+        id: 'RED-015', title: 'GCP合规承诺缺失', level: 'yellow', category: '专项合规',
+        pattern: /GCP|药物临床试验质量管理规范|ICH-GCP/,
+        desc: 'GCP是临床试验的核心合规要求。缺失GCP合规承诺违反监管要求，可能导致数据不被监管机构接受，整个试验需要重做。',
+        basis: ['《药物临床试验质量管理规范（GCP）》'],
+        clause: '在履行本协议的过程中，遵守中国药品/医疗器械/诊断试剂监督管理的相关法律法规（包括但不限于《药物临床试验质量管理规范》）和ICH-GCP指南的规定，按照临床研究方案及本协议的要求提供尽职、谨慎的服务，并遵循研究机构及其主要研究者就CRC服务事项对服务方提出的要求以及研究机构已告知服务方的相关操作流程。'
+      },
+      {
+        id: 'RED-016', title: '项目依据缺失', level: 'blue', category: '条款完整性',
+        pattern: /鉴于条款|项目批件|伦理批件|NMPA/,
+        desc: '协议缺少合法项目依据，无法证明签约逻辑链条完整，存在合同效力瑕疵风险。完整的鉴于条款能明确项目合法性基础。',
+        basis: ['《药物临床试验质量管理规范（GCP）》'],
+        clause: `鉴于：\n1. 申办者与研究机构就开展"【XXX临床研究】"（以下简称"本研究"）已订立正式临床试验主协议，本研究已取得【NMPA批件号/受理号】及【伦理委员会批件号】，项目处于合法开展状态；\n2. 本研究主要研究者为【XX】，研究机构具备合法临床试验资质；\n3. 为保障临床试验数据真实准确、研究文件完整规范、项目有序推进，申办方委托具备合法资质的SMO/服务方指派合规临床研究协调员（CRC），协助研究机构开展非医学判断类事务性辅助工作；\n4. 服务方保证具备合法经营资质、无严重违法失信记录、具备CRC服务专业能力。\n\n各方依据《药物临床试验质量管理规范》《临床研究协调员实践和管理专家共识》等相关法律法规及行业指南，本着平等自愿、合规守法原则，协商一致订立本协议。`
+      },
+      {
+        id: 'RED-017', title: '交接标准缺失', level: 'blue', category: '条款完整性',
+        pattern: /交接标准|交接时限|资料交接|数据核对/,
+        desc: '缺失交接标准可能导致人员变更时数据丢失、工作断层，影响项目连续性。CRC频繁更换是常见问题，必须有明确交接程序。',
+        basis: ['《临床研究协调员实践和管理专家共识（2024版）》'],
+        clause: '服务结束或CRC变更时，服务方应负责督促CRC完成完整资料交接、数据核对、工作台账移交、归还相关工作卡、工作服等物资，确保问题闭环、无数据丢失、无流程断层。更换后的CRC与原CRC应该至少有2周的交接时间，以保证项目开展的稳定性和连续性。'
+      },
+      {
+        id: 'RED-018', title: '违约责任缺失', level: 'blue', category: '条款完整性',
+        pattern: /违约责任|违约金|赔偿责任/,
+        desc: '缺失违约责任条款导致违约行为无法追责，合同约束力不足。CRC服务周期长、环节多，明确的违约责任是保障项目质量的重要手段。',
+        basis: ['《民法典》'],
+        clause: `1. 违约情形\n任何一方违反本协议项下任何一项约定或未履行本协议项下任何一项义务的行为均构成违约，包括但不限于：\n（1）服务方派驻CRC资质不符合要求；\n（2）服务方擅自更换CRC或更换流程不符合约定；\n（3）CRC超出职权范围从事医学判断类工作；\n（4）服务方擅自转包、分包本协议项下服务；\n（5）服务方泄露保密信息或违规处理数据；\n（6）服务方未按约定时间完成服务或服务质量不达标；\n（7）任何一方违反反商业贿赂约定。\n\n2. 违约责任\n（1）守约方有权要求违约方在合理期限内补正或采取补救措施；\n（2）若违约方在守约方书面通知后十五(15)天内仍未补正或采取补救措施的，守约方有权经书面通知立即终止本协议；\n（3）违约方应赔偿其违约行为给守约方造成的全部损失和费用，包括但不限于直接损失、间接损失、律师费、诉讼费、鉴定费等；\n（4）服务方CRC违规操作导致的行政处罚、第三方索赔、数据无效等全部后果，由服务方独立承担。`
+      },
+      {
+        id: 'RED-019', title: '权责不清', level: 'blue', category: '条款完整性',
+        pattern: /三方权责|责任划分|监督权|验收权|行政管理权/,
+        desc: '三方权责边界不清晰导致责任真空地带，易引发争议。申办方、研究机构、服务方各有独立职责，必须在协议中明确划分。',
+        basis: ['《药物临床试验质量管理规范（GCP）》'],
+        clause: `1. 资质与合规承诺\n服务方承诺其已获得一切必要授权以签署本协议，本协议与对其有约束力的其他协议或义务不互相冲突。服务方承诺其具有履行CRC服务所必需的以及相关法律法规所要求的资质，包括但不限于牌照、批复、业务资质、专业人员等。服务方不因履行本协议而获得任何与临床研究相关的利益（包括但不限于专利权、发表权等）。\n\n2. 合规履职义务\n在履行本协议的过程中，遵守中国药品/医疗器械/诊断试剂监督管理的相关法律法规（包括但不限于《药物临床试验质量管理规范》）和ICH-GCP指南的规定，按照临床研究方案及本协议的要求提供尽职、谨慎的服务，并遵循研究机构及其主要研究者就CRC服务事项对服务方提出的要求以及研究机构已告知服务方的相关操作流程。\n\n3. 记录与审计配合\n服务方应保留能证明其遵守本协议规定的记录及相关支持文件，并同意申办者有权在合理地事先通知后随时审计所有服务方的记录，以确保其符合本协议规定，同时确认申办者的所有付款。\n\n4. 人事管理责任\n服务方指派的CRC将始终是服务方的雇员，服务方应自行负责该雇员的工资、福利及社会保险等一切事宜，并承担作为用人单位的所有责任和义务。`
+      },
+      {
+        id: 'RED-020', title: '人事责任不清', level: 'blue', category: '条款完整性',
+        pattern: /SMO.*人事管理|服务方.*雇员|工资福利|社会保险/,
+        desc: 'SMO/服务方作为CRC雇主，应承担全部人事管理责任。缺失此类条款可能导致劳动关系认定争议，也可能导致研究机构被认定为事实雇主。',
+        basis: ['《劳动合同法》'],
+        clause: '服务方指派的CRC将始终是服务方的雇员，服务方应自行负责该雇员的工资、福利及社会保险等一切事宜，并承担作为用人单位的所有责任和义务。CRC造成的损失（包括自身受到的意外伤害、原始资料丢失、患者样本采集与保存有误、未经研究者允许私自开展工作等），由服务方承担相应后果。'
+      },
+      {
+        id: 'RED-021', title: '审核权缺失', level: 'blue', category: '条款完整性',
+        pattern: /申办方.*审核权|研究机构.*否决权|人员确认/,
+        desc: '申办方和研究机构作为项目管理方和现场监管方，应有权审核和否决不合格CRC。缺失审核权导致人员准入失控，可能出现未经培训的人员上岗。',
+        basis: ['《药物临床试验质量管理规范（GCP）》'],
+        clause: '服务方负责指派合格的CRC提供服务，并在项目开始之前得到申办者及研究机构的书面认可。所有派驻CRC需经申办方/CRA书面审核确认后方可上岗，研究机构和申办方拥有人员最终否决权。'
+      },
+      {
+        id: 'RED-022', title: '数据移交缺失', level: 'blue', category: '条款完整性',
+        pattern: /数据移交|资料归还|不得留存/,
+        desc: '缺失数据移交条款可能导致服务方私自留存涉密数据，侵犯申办方知识产权。项目结束后数据归属必须明确，服务方不得保留任何副本。',
+        basis: ['《数据安全法》', '《药物临床试验质量管理规范（GCP）》'],
+        clause: '项目结束后，服务方应按要求移交全部数据资料，不得私自留存任何涉密数据、试验资料或受试者信息。服务方及CRC仅可基于本项目履职需要有限使用上述数据和信息，不得以任何形式自行使用、复制、传播、外泄或用于本项目以外任何用途。'
+      },
+      {
+        id: 'RED-023', title: '人员不稳定', level: 'blue', category: '条款完整性',
+        pattern: /人员稳定性|不得随意更换|更换限制/,
+        desc: 'CRC频繁更换会影响项目连续性和数据质量。缺失稳定性要求不利于项目管理，也可能导致不同CRC对同一受试者的记录不一致。',
+        basis: ['《临床研究协调员实践和管理专家共识（2024版）》'],
+        clause: '服务方应指派相对稳定的CRC，指派的CRC原则上除产假、长病假、离职外不能更换。若服务方需更换CRC，必须提前一个月通知申办者及研究机构，获得申办者及研究机构同意后方可进行交接。'
+      },
+      {
+        id: 'RED-024', title: '报告义务缺失', level: 'blue', category: '条款完整性',
+        pattern: /重大事件报告|24小时.*通知|不良事件.*报告/,
+        desc: '临床试验中重大事件需及时报告。缺失报告义务可能导致SAE延报、漏报，违反GCP要求，严重时可能导致受试者安全风险被忽视。',
+        basis: ['《药物临床试验质量管理规范（GCP）》'],
+        clause: '服务方应定期向研究机构汇报CRC服务项目的进展，如服务方知悉发生重大事件（包括但不限于国家相关政策做出重大调整、发生不良事件、项目进度明显滞后），应在24小时内与申办者及研究机构沟通，并配合研究机构积极采取措施，减少给临床研究带来的影响及损失。'
       }
     ];
 
@@ -448,63 +387,26 @@
       return matches;
     }
 
-    function isCompliant(text, rule) {
-      // 缺失型合规判定：合规模式命中且必备要素齐备，并排除被否定词修饰的伪命中（如"未约定明确的交接标准和时限"）
-      if (!rule.pattern.test(text)) return false;
-      if (!rule.requirePattern) return true;
-      const reqMatches = findMatches(text, rule.requirePattern);
-      if (reqMatches.length === 0) return false;
-      return reqMatches.some(m => !/未|无|免除/.test(text.substring(Math.max(0, m.start - 12), m.start)));
-    }
-
     function audit(text) {
       const results = { red: [], yellow: [], blue: [] };
       for (const rule of rules) {
-        if (rule.checkType === 'exist') {
-          // 存在型：检测到问题条款表述即命中
-          const matches = findMatches(text, rule.pattern);
-          if (matches.length > 0) results[rule.level].push({ rule, matches, notes: [] });
-        } else if (rule.checkType === 'missing') {
-          // 缺失型：未找到合规约定（或要素不齐）即命中
-          if (!isCompliant(text, rule)) results[rule.level].push({ rule, matches: [], notes: [] });
-        } else if (rule.checkType === 'dual') {
-          // 双态：存在态按规则等级、缺失态按 missingLevel 分级，双态命中合并为一张卡
-          const matches = findMatches(text, rule.existPattern);
-          const existHit = matches.length > 0;
-          const missingHit = !rule.missingPattern.test(text);
-          if (existHit || missingHit) {
-            const notes = [];
-            if (existHit) notes.push('存在态命中：检测到问题条款表述');
-            if (missingHit) notes.push('缺失态命中：全文未见合规约定');
-            const level = existHit ? rule.level : (rule.missingLevel || rule.level);
-            results[level].push({ rule, matches, notes });
-          }
-        } else if (rule.checkType === 'scenario') {
-          // RED-010 双情形分流：先判断是否"两方协议模式"，再适用对应标准
-          const scenario1 = /另行签署|另行约定|两方协议/.test(text);
-          if (scenario1) {
-            const hasRecognize = /予以认可|研究机构.{0,12}(认可|同意)/.test(text);
-            const hasInvoice = /增值税.{0,6}专用发票|增值税专用发票/.test(text);
-            if (!(hasRecognize && hasInvoice)) {
-              const missing = [];
-              if (!hasRecognize) missing.push('研究机构对支付安排的认可');
-              if (!hasInvoice) missing.push('增值税专用发票约定');
-              results.yellow.push({ rule, matches: [], clauseKey: 'clause1', notes: ['情况一（两方协议模式）：费用支付另行签署两方协议，但缺少' + missing.join('与')] });
-            }
-          } else {
-            const matches = findMatches(text, rule.pattern);
-            if (matches.length > 0) results.yellow.push({ rule, matches, clauseKey: 'clause2', notes: ['情况二（本协议直接约定费用）：付款安排与履约成果脱钩'] });
-          }
+        const matches = findMatches(text, rule.pattern);
+        if (rule.level === 'red') {
+          if (matches.length > 0) results.red.push({ rule, matches });
+        } else if (rule.level === 'yellow') {
+          if (matches.length === 0) results.yellow.push({ rule, matches: [] });
+        } else if (rule.level === 'blue') {
+          if (matches.length === 0) results.blue.push({ rule, matches: [] });
         }
       }
       return results;
     }
 
     function getCategoryStats(results) {
-      const categories = {};
+      const categories = { 'CRC职权越权': 0, '数据与责任': 0, '授权与人员': 0, '合规风控': 0, '专项合规': 0, '条款完整性': 0 };
       for (const item of [...results.red, ...results.yellow, ...results.blue]) {
         const cat = item.rule.category;
-        categories[cat] = (categories[cat] || 0) + 1;
+        if (cat in categories) categories[cat]++;
       }
       return categories;
     }
@@ -763,21 +665,12 @@
     }
 
     // ==================== 核心：红色风险聚合渲染 ====================
-    function getItemClause(item) {
-      return item.clauseKey && item.rule[item.clauseKey] ? item.rule[item.clauseKey] : item.rule.clause;
-    }
-
-    function renderNotesHtml(notes) {
-      if (!notes || notes.length === 0) return '';
-      return `<div class="mt-2 space-y-1">${notes.map(n => `<div class="text-xs px-2 py-1 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">◆ ${n}</div>`).join('')}</div>`;
-    }
-
     function renderRedCard(item, mapping, isContractVersion) {
       const rule = item.rule;
       const matches = item.matches;
       const clauseText = isContractVersion && Object.keys(mapping).length > 0
-        ? replaceRolesInClause(getItemClause(item), mapping)
-        : getItemClause(item);
+        ? replaceRolesInClause(rule.clause, mapping)
+        : rule.clause;
       const versionBadge = isContractVersion && Object.keys(mapping).length > 0
         ? '<span class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 border border-green-200">已映射甲方/乙方/丙方</span>'
         : '<span class="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">标准专业术语</span>';
@@ -846,10 +739,6 @@
             <div class="mt-2 text-xs text-gray-500">
               <span class="font-medium">合规依据：</span>${rule.basis.join('、')}
             </div>
-            <div class="mt-1 text-xs text-gray-500">
-              <span class="font-medium">整改建议：</span>${rule.suggestion}
-            </div>
-            ${renderNotesHtml(item.notes)}
           </div>
 
           <!-- 修改建议区 -->
@@ -861,7 +750,7 @@
             <!-- 触发点列表 -->
             <div class="mb-4">
               <p class="text-xs font-semibold text-gray-500 mb-2">合同原文触发片段：</p>
-              ${modificationsHtml || '<p class="text-xs text-gray-400">（缺失态命中，无原文触发点）</p>'}
+              ${modificationsHtml}
             </div>
 
             <!-- 统一修改建议 -->
@@ -876,23 +765,14 @@
     function renderYellowBlueCard(item, mapping, isContractVersion, level) {
       const rule = item.rule;
       const clauseText = isContractVersion && Object.keys(mapping).length > 0
-        ? replaceRolesInClause(getItemClause(item), mapping)
-        : getItemClause(item);
+        ? replaceRolesInClause(rule.clause, mapping)
+        : rule.clause;
       const cardClass = 'risk-card-' + level;
       const badgeColor = level === 'yellow' ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-blue-100 text-blue-700 border-blue-200';
       const badgeText = level === 'yellow' ? '中等风险' : '一般瑕疵';
       const versionBadge = isContractVersion && Object.keys(mapping).length > 0
         ? '<span class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700 border border-green-200">已映射甲方/乙方/丙方</span>'
         : '<span class="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200">标准专业术语</span>';
-
-      let matchesHtml = '';
-      if (item.matches && item.matches.length > 0) {
-        matchesHtml = '<div class="text-sm"><span class="font-medium text-gray-500">合同原文触发片段：</span>' +
-          item.matches.map((match, idx) => {
-            const ctx = getContext(contractText, match, 40);
-            return `<div class="match-context mt-1"><span class="text-gray-500 text-xs">触发点 ${idx + 1}：</span><span class="text-gray-600">${escapeHtml(ctx.before)}</span><span class="match-highlight">${escapeHtml(ctx.highlight)}</span><span class="text-gray-600">${escapeHtml(ctx.after)}</span></div>`;
-          }).join('') + '</div>';
-      }
 
       return `
         <div class="bg-white border rounded-lg ${cardClass} mb-4">
@@ -908,12 +788,9 @@
             </div>
           </div>
           <div class="p-4 space-y-3">
-            <div class="text-sm"><span class="font-medium text-gray-500">触发条件：</span><p class="mt-1 text-gray-700">${rule.triggerText}</p></div>
-            ${renderNotesHtml(item.notes)}
-            ${matchesHtml}
+            <div class="text-sm"><span class="font-medium text-gray-500">触发条件：</span><p class="mt-1 text-gray-700">协议条款中未约定"${rule.pattern.source}"相关内容</p></div>
             <div class="text-sm"><span class="font-medium text-gray-500">风险说明：</span><p class="mt-1 text-gray-700">${rule.desc}</p></div>
             <div class="text-sm"><span class="font-medium text-gray-500">合规依据：</span><ul class="mt-1 list-disc list-inside text-gray-600">${rule.basis.map(b => `<li>${b}</li>`).join('')}</ul></div>
-            <div class="text-sm"><span class="font-medium text-gray-500">整改建议：</span><p class="mt-1 text-gray-700">${rule.suggestion}</p></div>
             <div class="text-sm"><span class="font-medium text-gray-500">建议条款：</span><pre class="mt-1 p-3 bg-gray-50 rounded-md text-xs overflow-x-auto border">${clauseText}</pre></div>
           </div>
         </div>`;
@@ -994,14 +871,13 @@
         md += '## 三、重大红色风险（强制拦截）\n\n';
         md += '> **处理要求**：立即终止审核，必须全部整改\n\n';
         red.forEach((item, i) => {
-          const clause = isContractVersion ? replaceRolesInClause(getItemClause(item), mapping) : getItemClause(item);
-          const notesMd = item.notes && item.notes.length > 0 ? `\n**判定说明**：${item.notes.join('；')}\n` : '';
-          md += `### ${item.rule.id}：${item.rule.title}\n${notesMd}\n**风险描述**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**整改建议**：${item.rule.suggestion}\n\n**涉及触发点**：${item.matches.length} 处\n\n**合同原文触发片段**：\n\n`;
+          const clause = isContractVersion ? replaceRolesInClause(item.rule.clause, mapping) : item.rule.clause;
+          md += `### ${item.rule.id}：${item.rule.title}\n\n**风险描述**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**涉及触发点**：${item.matches.length} 处\n\n**合同原文触发片段**：\n\n`;
           item.matches.forEach((match, idx) => {
             const ctx = getContext(contractText, match, 35);
             md += `${idx + 1}. ...${ctx.before}**${ctx.highlight}**${ctx.after}...\n`;
           });
-          md += `\n**替换条款**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
+          md += `\n**修改建议**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
         });
       }
 
@@ -1009,16 +885,8 @@
         md += '## 四、中等黄色风险（必须整改）\n\n';
         md += '> **处理要求**：审核不通过，必须整改后重新审核\n\n';
         yellow.forEach((item, i) => {
-          const clause = isContractVersion ? replaceRolesInClause(getItemClause(item), mapping) : getItemClause(item);
-          const notesMd = item.notes && item.notes.length > 0 ? `\n**判定说明**：${item.notes.join('；')}\n` : '';
-          let matchesMd = '';
-          if (item.matches && item.matches.length > 0) {
-            matchesMd = '\n**合同原文触发片段**：\n\n' + item.matches.map((match, idx) => {
-              const ctx = getContext(contractText, match, 35);
-              return `${idx + 1}. ...${ctx.before}**${ctx.highlight}**${ctx.after}...`;
-            }).join('\n') + '\n';
-          }
-          md += `### ${item.rule.id}：${item.rule.title}\n${notesMd}\n**触发条件**：${item.rule.triggerText}\n${matchesMd}\n**风险说明**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**整改建议**：${item.rule.suggestion}\n\n**替换条款**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
+          const clause = isContractVersion ? replaceRolesInClause(item.rule.clause, mapping) : item.rule.clause;
+          md += `### ${item.rule.id}：${item.rule.title}\n\n**触发条件**：协议条款中未约定"${item.rule.pattern.source}"相关内容\n\n**风险说明**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**建议条款**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
         });
       }
 
@@ -1026,8 +894,8 @@
         md += '## 五、一般蓝色瑕疵（建议优化）\n\n';
         md += '> **处理要求**：有条件通过，建议在签署前完成优化\n\n';
         blue.forEach((item, i) => {
-          const clause = isContractVersion ? replaceRolesInClause(getItemClause(item), mapping) : getItemClause(item);
-          md += `### ${item.rule.id}：${item.rule.title}\n\n**触发条件**：${item.rule.triggerText}\n\n**风险说明**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**整改建议**：${item.rule.suggestion}\n\n**替换条款**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
+          const clause = isContractVersion ? replaceRolesInClause(item.rule.clause, mapping) : item.rule.clause;
+          md += `### ${item.rule.id}：${item.rule.title}\n\n**触发条件**：协议条款中未约定"${item.rule.pattern.source}"相关内容\n\n**风险说明**：${item.rule.desc}\n\n**合规依据**：${item.rule.basis.join('、')}\n\n**建议条款**：\n\n\`\`\`\n${clause}\n\`\`\`\n\n---\n\n`;
         });
       }
 
